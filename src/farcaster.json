@@ -1,0 +1,45 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjk3OTI4NCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGEzRmYxMTE3Njc2RkM3RjVkMUQ4YkExNzUxN0JGM2FkOGFhOTRFMTEifQ",
+    "payload": "eyJkb21haW4iOiJjaGFuZ2Vsb2cuenRiLmRldiJ9",
+    "signature": "uJ8HN6LoS0tSkMgXEJID+8pSb4LQyZQ2gEHCzG0/WiwHifSOe8gRCONZ34tG6rX0lFS0FFtD4HONbr3tIPlKbhw="
+  },
+  "baseBuilder": {
+    "ownerAddress": "0x58FEF4aA757Bd5f5a72b5613348F0B6073617865"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Changelog",
+    "iconUrl": "https://changelog.ztb.dev/favicon.png",
+    "homeUrl": "https://changelog.ztb.dev/",
+    "imageUrl": "https://changelog.ztb.dev/favicon.png",
+    "buttonTitle": "Build in public",
+    "splashImageUrl": "https://changelog.ztb.dev/favicon.png",
+    "splashBackgroundColor": "#ffffff",
+    "subtitle": "Build in public",
+    "description": "Changelog is a platform for builders to share what they're working on. Connect with other builders, learn together, and get rewarded for showing up consistently.",
+    "tagline": "Build in public",
+    "primaryCategory": "social",
+    "tags": ["builders", "social", "games", "community", "challenges"],
+    "ogTitle": "Changelog",
+    "ogDescription": "Changelog is a platform for builders to share what they're working on.",
+    "ogImageUrl": "https://changelog.ztb.dev/og-image.png",
+    "heroImageUrl": "https://changelog.ztb.dev/hero-image.png",
+    "screenshotUrls": [
+      "https://changelog.ztb.dev/screenshot-1.png",
+      "https://changelog.ztb.dev/screenshot-2.png",
+      "https://changelog.ztb.dev/screenshot-3.png"
+    ],
+    "requiredChains": ["eip155:8453"],
+    "requiredCapabilities": [
+      "wallet.getEthereumProvider",
+      "actions.ready",
+      "actions.addMiniApp",
+      "actions.composeCast",
+      "actions.signIn",
+      "actions.viewProfile",
+      "back"
+    ],
+    "noindex": false
+  }
+}
