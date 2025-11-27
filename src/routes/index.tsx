@@ -136,24 +136,27 @@ function IndexComponent() {
           </div>
         </div>
 
-        <div className="mt-12 space-y-8 pb-12">
+        <div className="mt-12 relative before:absolute before:left-5 before:top-0 before:h-full before:w-px before:bg-gray-200 dark:before:bg-neutral-800 pb-12">
           {MOCK_UPDATES.map((update) => (
-            <div key={update.id} className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-500 shrink-0" />
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-900 dark:text-white">
+            <div key={update.id} className="relative pl-16 pb-12 last:pb-0">
+              <div className="absolute left-0 top-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-500 shrink-0 ring-4 ring-white dark:ring-neutral-950 z-10" />
+
+              <div className="pt-1">
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="font-semibold text-gray-900 dark:text-white tracking-tight">
                     {update.ethAddress}
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-xs font-medium text-gray-400 dark:text-neutral-500">
                     {update.timestamp}
                   </span>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+
+                <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed text-[15px] mb-4">
                   {update.text}
                 </p>
+
                 {update.attachments.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="flex flex-wrap gap-3">
                     {update.attachments.map((att, i) => (
                       <a
                         key={i}
@@ -161,10 +164,21 @@ function IndexComponent() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => handleLinkClick(e, att.url)}
-                        className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg transition-colors border border-blue-100 dark:border-blue-800"
+                        className="group flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 hover:border-gray-300 dark:hover:border-neutral-700 transition-all w-full sm:w-auto shadow-sm hover:shadow-md"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        {att.title || att.url}
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                          <ExternalLink className="w-4 h-4" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {att.title || "External Link"}
+                          </span>
+                          <span className="text-xs text-gray-400 dark:text-neutral-500 truncate max-w-[200px]">
+                            {att.url
+                              .replace(/^https?:\/\//, "")
+                              .replace(/\/$/, "")}
+                          </span>
+                        </div>
                       </a>
                     ))}
                   </div>

@@ -59,7 +59,7 @@ export function LinkWarningModal({
 
           <div className="w-full pt-2 space-y-2">
             <Button
-              className="w-full bg-black text-white dark:bg-white dark:text-black hover:opacity-90 h-10 rounded-xl"
+              className="w-full bg-black text-white dark:bg-white dark:text-black hover:bg-black/90 h-10 rounded-xl"
               onClick={handleConfirm}
             >
               Continue
