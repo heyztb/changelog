@@ -96,15 +96,6 @@ function IndexComponent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const isMiniapp = await sdk.isInMiniApp();
-      if (isMiniapp) {
-        await sdk.actions.ready();
-      }
-    })();
-  });
-
   return (
     <div className="flex flex-col items-center mt-12 min-h-[80vh]">
       <div className="w-full max-w-3xl px-4">
