@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UserFidRouteImport } from './routes/user/$fid'
+import { Route as UserFidProjectSlugRouteImport } from './routes/user_.$fid.project.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserFidRoute = UserFidRouteImport.update({
+  id: '/user/$fid',
+  path: '/user/$fid',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserFidProjectSlugRoute = UserFidProjectSlugRouteImport.update({
+  id: '/user_/$fid/project/$slug',
+  path: '/user/$fid/project/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/user/$fid': typeof UserFidRoute
+  '/user/$fid/project/$slug': typeof UserFidProjectSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/user/$fid': typeof UserFidRoute
+  '/user/$fid/project/$slug': typeof UserFidProjectSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/user/$fid': typeof UserFidRoute
+  '/user_/$fid/project/$slug': typeof UserFidProjectSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/user/$fid' | '/user/$fid/project/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/user/$fid' | '/user/$fid/project/$slug'
+  id: '__root__' | '/' | '/user/$fid' | '/user_/$fid/project/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  UserFidRoute: typeof UserFidRoute
+  UserFidProjectSlugRoute: typeof UserFidProjectSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user/$fid': {
+      id: '/user/$fid'
+      path: '/user/$fid'
+      fullPath: '/user/$fid'
+      preLoaderRoute: typeof UserFidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user_/$fid/project/$slug': {
+      id: '/user_/$fid/project/$slug'
+      path: '/user/$fid/project/$slug'
+      fullPath: '/user/$fid/project/$slug'
+      preLoaderRoute: typeof UserFidProjectSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  UserFidRoute: UserFidRoute,
+  UserFidProjectSlugRoute: UserFidProjectSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,59 +1,30 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
-import { Paperclip, ArrowUp, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Paperclip, ArrowUp, ChevronDown, Plus } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
+import { ShipTimeline } from "@/components/ShipTimeline";
+import { getAllShips } from "@/lib/mock-data";
+import { useUserProjects } from "@/lib/useUserProjects";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
 });
 
-interface Update {
-  id: string;
-  ethAddress: string;
-  text: string;
-  attachments: Array<{ type: "link"; url: string; title?: string }>;
-  timestamp: string;
-}
-
-const MOCK_UPDATES: Update[] = [
-  {
-    id: "1",
-    ethAddress: "0x71C...9A23",
-    text: "Just shipped the new landing page! 🚀\n\nCheck it out live.",
-    attachments: [
-      { type: "link", url: "https://example.com", title: "Live Demo" },
-    ],
-    timestamp: "2h ago",
-  },
-  {
-    id: "2",
-    ethAddress: "0x3B2...4F12",
-    text: "Working on the smart contract integration. These docs are a lifesaver.",
-    attachments: [
-      {
-        type: "link",
-        url: "https://docs.ethers.org",
-        title: "Ethers.js Documentation",
-      },
-    ],
-    timestamp: "4h ago",
-  },
-  {
-    id: "3",
-    ethAddress: "0x9D1...8E45",
-    text: "Finally fixed that annoying bug in the authentication flow. Turns out it was a race condition.",
-    attachments: [],
-    timestamp: "6h ago",
-  },
-];
-
 function IndexComponent() {
   const [message, setMessage] = useState("");
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [showLinkWarning, setShowLinkWarning] = useState(false);
   const [pendingLink, setPendingLink] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { projects, addProject, isLoaded } = useUserProjects();
+  const ships = getAllShips();
 
   const handleLinkClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -77,9 +48,10 @@ function IndexComponent() {
   };
 
   const handleSubmit = () => {
-    if (message.trim()) {
-      console.log("Sending message:", message);
+    if (message.trim() && selectedProject) {
+      console.log("Sending ship:", { message, project: selectedProject });
       setMessage("");
+      setSelectedProject(null);
     }
   };
 
@@ -89,6 +61,40 @@ function IndexComponent() {
       handleSubmit();
     }
   };
+
+  const handleSelectProject = (project: string) => {
+    setSelectedProject(project);
+    setShowProjectDropdown(false);
+    setShowNewProjectInput(false);
+    setNewProjectName("");
+  };
+
+  const handleCreateProject = () => {
+    if (newProjectName.trim()) {
+      const name = newProjectName.trim();
+      addProject(name);
+      setSelectedProject(name);
+      setShowProjectDropdown(false);
+      setShowNewProjectInput(false);
+      setNewProjectName("");
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowProjectDropdown(false);
+        setShowNewProjectInput(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -111,7 +117,7 @@ function IndexComponent() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Share your progress"
+            placeholder="What did you ship today?"
             className="w-full bg-transparent border-none text-black dark:text-white placeholder:text-gray-400 resize-none text-base focus-visible:ring-0 focus-visible:ring-offset-0 min-h-6 max-h-[200px]"
             rows={1}
           />
@@ -125,10 +131,112 @@ function IndexComponent() {
                 <Paperclip className="w-4 h-4 mr-1" />
                 Attach
               </Button>
+
+              {/* Project selector */}
+              <div className="relative" ref={dropdownRef}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowProjectDropdown(!showProjectDropdown)}
+                  className={`rounded-full h-9 px-3 hover:bg-gray-100 dark:hover:bg-neutral-700 ${
+                    selectedProject
+                      ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20"
+                      : "text-gray-600 dark:text-gray-300"
+                  }`}
+                >
+                  {selectedProject || "Select project"}
+                  <ChevronDown className="w-4 h-4 ml-1" />
+                </Button>
+
+                {showProjectDropdown && (
+                  <div className="absolute top-full left-0 mt-2 w-56 rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-lg z-50 overflow-hidden">
+                    <div className="py-2">
+                      {isLoaded &&
+                        projects.length === 0 &&
+                        !showNewProjectInput && (
+                          <p className="px-4 py-2 text-sm text-gray-500 dark:text-neutral-400">
+                            No projects yet. Create one!
+                          </p>
+                        )}
+
+                      {projects.map((project) => (
+                        <button
+                          key={project}
+                          onClick={() => handleSelectProject(project)}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors ${
+                            selectedProject === project
+                              ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20"
+                              : "text-gray-900 dark:text-white"
+                          }`}
+                        >
+                          {project}
+                        </button>
+                      ))}
+
+                      <div className="border-t border-gray-200 dark:border-neutral-700 mt-2 pt-2">
+                        {showNewProjectInput ? (
+                          <div className="px-3 py-2">
+                            <input
+                              type="text"
+                              value={newProjectName}
+                              onChange={(e) =>
+                                setNewProjectName(e.target.value)
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleCreateProject();
+                                }
+                                if (e.key === "Escape") {
+                                  setShowNewProjectInput(false);
+                                  setNewProjectName("");
+                                }
+                              }}
+                              placeholder="Project name"
+                              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-700 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                              autoFocus
+                            />
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                onClick={handleCreateProject}
+                                disabled={!newProjectName.trim()}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-8"
+                              >
+                                Create
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setShowNewProjectInput(false);
+                                  setNewProjectName("");
+                                }}
+                                className="rounded-lg h-8"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setShowNewProjectInput(true)}
+                            className="w-full text-left px-4 py-2 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors flex items-center gap-2"
+                          >
+                            <Plus className="w-4 h-4" />
+                            New project
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+
             <Button
               onClick={handleSubmit}
-              disabled={!message.trim()}
+              disabled={!message.trim() || !selectedProject}
               className="bg-black text-white dark:bg-white dark:text-black rounded-full h-9 w-9 p-0 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-80"
             >
               <ArrowUp className="w-5 h-5" />
@@ -136,56 +244,8 @@ function IndexComponent() {
           </div>
         </div>
 
-        <div className="mt-12 relative before:absolute before:left-5 before:top-0 before:h-full before:w-px before:bg-gray-200 dark:before:bg-neutral-800 pb-12">
-          {MOCK_UPDATES.map((update) => (
-            <div key={update.id} className="relative pl-16 pb-12 last:pb-0">
-              <div className="absolute left-0 top-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-500 shrink-0 ring-4 ring-white dark:ring-neutral-950 z-10" />
-
-              <div className="pt-1">
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className="font-semibold text-gray-900 dark:text-white tracking-tight">
-                    {update.ethAddress}
-                  </span>
-                  <span className="text-xs font-medium text-gray-400 dark:text-neutral-500">
-                    {update.timestamp}
-                  </span>
-                </div>
-
-                <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed text-[15px] mb-4">
-                  {update.text}
-                </p>
-
-                {update.attachments.length > 0 && (
-                  <div className="flex flex-wrap gap-3">
-                    {update.attachments.map((att, i) => (
-                      <a
-                        key={i}
-                        href={att.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => handleLinkClick(e, att.url)}
-                        className="group flex items-center gap-3 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 hover:border-gray-300 dark:hover:border-neutral-700 transition-all w-full sm:w-auto shadow-sm hover:shadow-md"
-                      >
-                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 dark:bg-neutral-800 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                          <ExternalLink className="w-4 h-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {att.title || "External Link"}
-                          </span>
-                          <span className="text-xs text-gray-400 dark:text-neutral-500 truncate max-w-[200px]">
-                            {att.url
-                              .replace(/^https?:\/\//, "")
-                              .replace(/\/$/, "")}
-                          </span>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="mt-12">
+          <ShipTimeline ships={ships} onLinkClick={handleLinkClick} />
         </div>
       </div>
 

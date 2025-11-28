@@ -28,6 +28,7 @@ function RootComponent() {
             <Outlet />
           </main>
         </div>
+        {process.env.NODE_ENV !== "production" && <TanStackRouterDevtools />}
       </QueryClientProvider>
     </WagmiProvider>
   );
