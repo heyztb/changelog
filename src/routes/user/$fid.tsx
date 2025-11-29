@@ -130,6 +130,7 @@ function UserProfileComponent() {
             ships={user.ships}
             onLinkClick={handleLinkClick}
             showProject={true}
+            separated={true}
           />
         </div>
       </div>

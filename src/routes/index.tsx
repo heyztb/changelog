@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { Paperclip, ArrowUp, ChevronDown, Plus } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { sdk } from "@farcaster/miniapp-sdk";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { getAllShips } from "@/lib/mock-data";
@@ -13,6 +12,74 @@ export const Route = createFileRoute("/")({
   component: IndexComponent,
 });
 
+const getTagline = () => {
+  const hour = new Date().getHours();
+
+  const morningTaglines = [
+    "Good morning, builder ☀️",
+    "Rise and ship 🌅",
+    "Morning momentum starts here",
+    "Early bird gets the deploy",
+    "Fresh start, fresh commits",
+  ];
+
+  const afternoonTaglines = [
+    "Keep shipping 🚀",
+    "Afternoon progress report",
+    "What did you build today?",
+    "Show us what you made",
+    "Momentum doesn't stop",
+  ];
+
+  const eveningTaglines = [
+    "Evening check-in 🌙",
+    "Ship before sunset 🌆",
+    "End the day with a win",
+    "What did you accomplish?",
+    "Close the loop on today",
+  ];
+
+  const lateNightTaglines = [
+    "Burning the midnight oil? 🔥",
+    "Night owl shipping hours 🦉",
+    "Late night builds hit different",
+    "The best code ships at night",
+    "Nocturnal builder mode",
+  ];
+
+  const generalTaglines = [
+    "Build in public",
+    "Ship daily, grow exponentially",
+    "Your daily shipping log",
+    "Consistency beats intensity",
+    "Document the journey",
+    "Show your work",
+    "Progress over perfection",
+    "One ship at a time",
+    "Build, ship, repeat",
+    "Make it count",
+  ];
+
+  let taglines: string[];
+
+  if (hour >= 5 && hour < 12) {
+    taglines = morningTaglines;
+  } else if (hour >= 12 && hour < 17) {
+    taglines = afternoonTaglines;
+  } else if (hour >= 17 && hour < 22) {
+    taglines = eveningTaglines;
+  } else {
+    taglines = lateNightTaglines;
+  }
+
+  // 30% chance to show a general tagline instead of time-based
+  if (Math.random() < 0.3) {
+    taglines = generalTaglines;
+  }
+
+  return taglines[Math.floor(Math.random() * taglines.length)];
+};
+
 function IndexComponent() {
   const [message, setMessage] = useState("");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
@@ -21,6 +88,7 @@ function IndexComponent() {
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [showLinkWarning, setShowLinkWarning] = useState(false);
   const [pendingLink, setPendingLink] = useState<string | null>(null);
+  const tagline = getTagline();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { projects, addProject, isLoaded } = useUserProjects();
@@ -80,7 +148,6 @@ function IndexComponent() {
     }
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -100,7 +167,7 @@ function IndexComponent() {
     <div className="flex flex-col items-center mt-12 min-h-[80vh]">
       <div className="w-full max-w-3xl px-4">
         <h1 className="text-4xl font-semibold text-center mb-12 text-gray-900 dark:text-white">
-          Build in public
+          {tagline}
         </h1>
 
         <div className="w-full rounded-3xl p-3 bg-white dark:bg-neutral-800 shadow-lg border border-gray-200 dark:border-neutral-700">
@@ -236,7 +303,11 @@ function IndexComponent() {
         </div>
 
         <div className="mt-12">
-          <ShipTimeline ships={ships} onLinkClick={handleLinkClick} />
+          <ShipTimeline
+            ships={ships}
+            onLinkClick={handleLinkClick}
+            separated={true}
+          />
         </div>
       </div>
 
