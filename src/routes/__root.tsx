@@ -16,6 +16,8 @@ import { sdk } from "@farcaster/miniapp-sdk";
 import { useConnect, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Wallet, LogOut } from "lucide-react";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ModeToggle } from "@/components/ModeToggle";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -85,22 +87,25 @@ function RootComponent() {
   }, []);
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <div className="flex flex-col min-h-screen">
-          {isMiniapp === false && (
-            <header className="border-b">
-              <div className="container mx-auto px-4 py-4 flex justify-end">
-                <ConnectWallet />
-              </div>
-            </header>
-          )}
-          <main className="flex-1 container mx-auto px-4 py-8">
-            <Outlet />
-          </main>
-        </div>
-        {process.env.NODE_ENV !== "production" && <TanStackRouterDevtools />}
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider defaultTheme="system" storageKey="changelog-theme">
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <div className="flex flex-col min-h-screen">
+            {isMiniapp === false && (
+              <header className="border-b">
+                <div className="container mx-auto px-4 py-4 flex justify-end items-center gap-4">
+                  <ModeToggle />
+                  <ConnectWallet />
+                </div>
+              </header>
+            )}
+            <main className="flex-1 container mx-auto px-4 py-8">
+              <Outlet />
+            </main>
+          </div>
+          {process.env.NODE_ENV !== "production" && <TanStackRouterDevtools />}
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   );
 }
