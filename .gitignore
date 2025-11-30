@@ -32,3 +32,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+
+## too large for jj, probably don't need it anyways
+contracts/lib/openzeppelin-contracts/test/utils/cryptography/SigVer15_186-3.rsp
