@@ -1,0 +1,169 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {SchemaResolver} from "@eas/resolver/SchemaResolver.sol";
+import {IEAS, Attestation} from "@eas/IEAS.sol";
+import {IStreakTracker} from "./interfaces/IStreakTracker.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+/// @title ShipResolver
+/// @notice Resolver contract for Ship attestations on EAS
+/// @dev Validates ship attestations and automatically updates streak tracking
+/// @custom:security-contact security@changelog.build
+contract ShipResolver is SchemaResolver, Ownable {
+    /// @notice The StreakTracker contract instance
+    IStreakTracker public immutable streakTracker;
+
+    /// @notice The Project schema UID that ships must reference
+    bytes32 public immutable projectSchemaUID;
+
+    /// @notice Mapping to track last ship timestamp per FID (for rate limiting)
+    mapping(uint256 => uint256) public lastShipTimestamp;
+
+    /// @notice Minimum time between ships (24 hours)
+    uint256 public constant MIN_SHIP_INTERVAL = 24 hours;
+
+    /// @notice Maximum text length for ships (prevents spam)
+    uint256 public constant MAX_TEXT_LENGTH = 5000;
+
+    /// @notice Emitted when a ship is successfully created
+    /// @param fid The Farcaster ID of the shipper
+    /// @param attestationUID The UID of the ship attestation
+    /// @param projectRefUID The referenced project attestation UID
+    /// @param timestamp The timestamp of the ship
+    event ShipCreated(
+        uint256 indexed fid,
+        bytes32 indexed attestationUID,
+        bytes32 indexed projectRefUID,
+        uint256 timestamp
+    );
+
+    /// @notice Error thrown when the referenced project attestation is invalid
+    error InvalidProjectReference();
+
+    /// @notice Error thrown when user tries to ship more than once per day
+    error AlreadyShippedToday();
+
+    /// @notice Error thrown when the ship text is empty
+    error EmptyShipText();
+
+    /// @notice Error thrown when the ship text exceeds maximum length
+    error ShipTextTooLong();
+
+    /// @notice Error thrown when FID is invalid (zero)
+    error InvalidFID();
+
+    /// @notice Error thrown when attempting to revoke (not allowed)
+    error RevocationNotSupported();
+
+    /// @notice Constructor initializes the resolver with dependencies
+    /// @param _eas The EAS contract address
+    /// @param _streakTracker The StreakTracker contract address
+    /// @param _projectSchemaUID The UID of the Project schema
+    /// @param initialOwner The address that will own the contract
+    constructor(
+        IEAS _eas,
+        IStreakTracker _streakTracker,
+        bytes32 _projectSchemaUID,
+        address initialOwner
+    ) SchemaResolver(_eas) Ownable(initialOwner) {
+        streakTracker = _streakTracker;
+        projectSchemaUID = _projectSchemaUID;
+    }
+
+    /// @notice Validates and processes ship attestations
+    /// @dev Called automatically by EAS when attestations are created
+    /// @param attestation The attestation data from EAS
+    /// @return bool True if attestation is valid, false otherwise
+    function onAttest(
+        Attestation calldata attestation,
+        uint256 /*value*/
+    ) internal override returns (bool) {
+        // Decode ship data
+        // Schema: bytes32 projectRefUID, string text, string link, uint256 timestamp, uint256 fid
+        (bytes32 projectRefUID, string memory text, , , uint256 fid) = abi
+            .decode(
+                attestation.data,
+                (bytes32, string, string, uint256, uint256)
+            );
+
+        // Validate FID
+        if (fid == 0) revert InvalidFID();
+
+        // Validate text
+        if (bytes(text).length == 0) revert EmptyShipText();
+        if (bytes(text).length > MAX_TEXT_LENGTH) revert ShipTextTooLong();
+
+        // Validate project reference exists and is valid
+        if (!_isValidAttestation(projectRefUID)) {
+            revert InvalidProjectReference();
+        }
+
+        // Rate limiting: ensure user hasn't shipped today already
+        uint256 lastShip = lastShipTimestamp[fid];
+        if (lastShip > 0 && block.timestamp - lastShip < MIN_SHIP_INTERVAL) {
+            revert AlreadyShippedToday();
+        }
+
+        // Update last ship timestamp
+        lastShipTimestamp[fid] = block.timestamp;
+
+        // Record ship in StreakTracker
+        // This will handle streak calculation automatically
+        streakTracker.recordShip(fid, attestation.uid);
+
+        // Emit event for indexers
+        emit ShipCreated(fid, attestation.uid, projectRefUID, block.timestamp);
+
+        return true;
+    }
+
+    /// @notice Handles attestation revocations (not supported for ships)
+    /// @dev Ships are immutable - revocation is disabled
+    /// @return bool Always reverts
+    function onRevoke(
+        Attestation calldata /*attestation*/,
+        uint256 /*value*/
+    ) internal pure override returns (bool) {
+        revert RevocationNotSupported();
+    }
+
+    /// @notice Checks if an attestation UID exists and is valid in EAS
+    /// @param uid The attestation UID to check
+    /// @return bool True if attestation exists and is valid
+    function _isValidAttestation(bytes32 uid) private view returns (bool) {
+        // Check if the attestation exists in EAS
+        Attestation memory attestation = _eas.getAttestation(uid);
+
+        // Attestation is valid if:
+        // 1. It has been created (time > 0)
+        // 2. It hasn't been revoked (revocationTime == 0)
+        // 3. It references the correct schema (optional additional check)
+        return
+            attestation.time > 0 &&
+            attestation.revocationTime == 0 &&
+            attestation.schema == projectSchemaUID;
+    }
+
+    /// @notice Checks if a user has already shipped today
+    /// @param fid The Farcaster ID to check
+    /// @return bool True if user has shipped within the last 24 hours
+    function hasShippedToday(uint256 fid) external view returns (bool) {
+        uint256 lastShip = lastShipTimestamp[fid];
+        if (lastShip == 0) return false;
+        return block.timestamp - lastShip < MIN_SHIP_INTERVAL;
+    }
+
+    /// @notice Gets the time remaining until a user can ship again
+    /// @param fid The Farcaster ID to check
+    /// @return uint256 Seconds remaining until next ship is allowed (0 if can ship now)
+    function getTimeUntilNextShip(uint256 fid) external view returns (uint256) {
+        uint256 lastShip = lastShipTimestamp[fid];
+        if (lastShip == 0) return 0;
+
+        uint256 timeSinceLastShip = block.timestamp - lastShip;
+        if (timeSinceLastShip >= MIN_SHIP_INTERVAL) return 0;
+
+        return MIN_SHIP_INTERVAL - timeSinceLastShip;
+    }
+}

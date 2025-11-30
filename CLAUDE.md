@@ -228,3 +228,8 @@ High friction = quality but invisibility. Solution: **Be an editor, not a fireho
 
 ## Key Insight
 **Make "I have a 365-day shipping streak" something people brag about.** When builders see others with long streaks and think "I want that," you've won. The product becomes part of their identity.
+
+--
+
+Base Sepolia Project Schema UID: 0x7ac71a5f2f9e8fa90bc9e8fce4f22640828d5a33d9ac6415030204d8b6acd7d6
+Link: https://base-sepolia.easscan.org/schema/view/0x7ac71a5f2f9e8fa90bc9e8fce4f22640828d5a33d9ac6415030204d8b6acd7d6
