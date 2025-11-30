@@ -2,7 +2,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { Paperclip, ArrowUp, ChevronDown, Plus } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { getAllShips } from "@/lib/mock-data";
@@ -88,7 +88,7 @@ function IndexComponent() {
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [showLinkWarning, setShowLinkWarning] = useState(false);
   const [pendingLink, setPendingLink] = useState<string | null>(null);
-  const tagline = getTagline();
+  const tagline = useMemo(() => getTagline(), []);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { projects, addProject, isLoaded } = useUserProjects();
@@ -131,7 +131,11 @@ function IndexComponent() {
   };
 
   const handleSelectProject = (project: string) => {
-    setSelectedProject(project);
+    if (selectedProject === project) {
+      setSelectedProject(null);
+    } else {
+      setSelectedProject(project);
+    }
     setShowProjectDropdown(false);
     setShowNewProjectInput(false);
     setNewProjectName("");
