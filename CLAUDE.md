@@ -133,16 +133,26 @@ A Farcaster miniapp for builders to log what they ship daily. Twitter-like inter
 - **Proof**: Dynamic NFT that updates to show current streak
 - **Network**: Base L2 for cheap transactions (~$0.0008 per ship)
 
-### EAS Schema
+### EAS Schemas
+
+**Project Schema:**
 ```
-Ship {
-  string text,
-  string link,
-  string project,
-  uint256 timestamp,
-  uint256 fid
-}
+string name
+string description
+string website
+address creator
+uint256 createdAt
 ```
+
+**Ship Schema:**
+```
+string text
+string[] links
+uint256 timestamp
+uint256 fid
+```
+
+**Key Design:** Ships use EAS's native `refUID` field to reference Project attestations, keeping schemas focused and composable. The `links` array supports multiple URLs (GitHub, docs, demos, etc.).
 
 ### Smart Contracts
 1. **StreakTracker**: Calculates streaks based on daily ships
@@ -231,5 +241,16 @@ High friction = quality but invisibility. Solution: **Be an editor, not a fireho
 
 --
 
-Base Sepolia Project Schema UID: 0x7ac71a5f2f9e8fa90bc9e8fce4f22640828d5a33d9ac6415030204d8b6acd7d6
-Link: https://base-sepolia.easscan.org/schema/view/0x7ac71a5f2f9e8fa90bc9e8fce4f22640828d5a33d9ac6415030204d8b6acd7d6
+## Deployed Schemas (Base Sepolia)
+
+**Project Schema UID:** `0x7ac71a5f2f9e8fa90bc9e8fce4f22640828d5a33d9ac6415030204d8b6acd7d6`
+- Link: https://base-sepolia.easscan.org/schema/view/0x7ac71a5f2f9e8fa90bc9e8fce4f22640828d5a33d9ac6415030204d8b6acd7d6
+- Schema: `string name,string description,string website,address creator,uint256 createdAt`
+- Revocable: false
+- Resolver: none
+
+**Ship Schema UID:** (to be registered after ShipResolver deployment)
+- Schema: `string text,string[] links,uint256 timestamp,uint256 fid`
+- Revocable: false
+- Resolver: ShipResolver address
+- Note: Uses `refUID` to reference Project attestations

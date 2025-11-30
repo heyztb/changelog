@@ -26,10 +26,13 @@ contract ShipResolver is SchemaResolver, Ownable {
     /// @notice Maximum text length for ships (prevents spam)
     uint256 public constant MAX_TEXT_LENGTH = 5000;
 
+    /// @notice Maximum number of links per ship
+    uint256 public constant MAX_LINKS = 10;
+
     /// @notice Emitted when a ship is successfully created
     /// @param fid The Farcaster ID of the shipper
     /// @param attestationUID The UID of the ship attestation
-    /// @param projectRefUID The referenced project attestation UID
+    /// @param projectRefUID The referenced project attestation UID (from refUID)
     /// @param timestamp The timestamp of the ship
     event ShipCreated(
         uint256 indexed fid,
@@ -56,6 +59,12 @@ contract ShipResolver is SchemaResolver, Ownable {
     /// @notice Error thrown when attempting to revoke (not allowed)
     error RevocationNotSupported();
 
+    /// @notice Error thrown when no project reference is provided
+    error MissingProjectReference();
+
+    /// @notice Error thrown when too many links are provided
+    error TooManyLinks();
+
     /// @notice Constructor initializes the resolver with dependencies
     /// @param _eas The EAS contract address
     /// @param _streakTracker The StreakTracker contract address
@@ -79,13 +88,22 @@ contract ShipResolver is SchemaResolver, Ownable {
         Attestation calldata attestation,
         uint256 /*value*/
     ) internal override returns (bool) {
+        // Validate that a project reference exists (using native EAS refUID)
+        if (attestation.refUID == bytes32(0)) {
+            revert MissingProjectReference();
+        }
+
+        // Validate project reference exists and is valid
+        if (!_isValidProjectAttestation(attestation.refUID)) {
+            revert InvalidProjectReference();
+        }
+
         // Decode ship data
-        // Schema: bytes32 projectRefUID, string text, string link, uint256 timestamp, uint256 fid
-        (bytes32 projectRefUID, string memory text, , , uint256 fid) = abi
-            .decode(
-                attestation.data,
-                (bytes32, string, string, uint256, uint256)
-            );
+        // Schema: string text, string[] links, uint256 timestamp, uint256 fid
+        (string memory text, string[] memory links, , uint256 fid) = abi.decode(
+            attestation.data,
+            (string, string[], uint256, uint256)
+        );
 
         // Validate FID
         if (fid == 0) revert InvalidFID();
@@ -94,10 +112,8 @@ contract ShipResolver is SchemaResolver, Ownable {
         if (bytes(text).length == 0) revert EmptyShipText();
         if (bytes(text).length > MAX_TEXT_LENGTH) revert ShipTextTooLong();
 
-        // Validate project reference exists and is valid
-        if (!_isValidAttestation(projectRefUID)) {
-            revert InvalidProjectReference();
-        }
+        // Validate links array
+        if (links.length > MAX_LINKS) revert TooManyLinks();
 
         // Rate limiting: ensure user hasn't shipped today already
         uint256 lastShip = lastShipTimestamp[fid];
@@ -112,8 +128,13 @@ contract ShipResolver is SchemaResolver, Ownable {
         // This will handle streak calculation automatically
         streakTracker.recordShip(fid, attestation.uid);
 
-        // Emit event for indexers
-        emit ShipCreated(fid, attestation.uid, projectRefUID, block.timestamp);
+        // Emit event for indexers (using refUID from attestation)
+        emit ShipCreated(
+            fid,
+            attestation.uid,
+            attestation.refUID,
+            block.timestamp
+        );
 
         return true;
     }
@@ -128,17 +149,19 @@ contract ShipResolver is SchemaResolver, Ownable {
         revert RevocationNotSupported();
     }
 
-    /// @notice Checks if an attestation UID exists and is valid in EAS
+    /// @notice Checks if a project attestation UID exists and is valid in EAS
     /// @param uid The attestation UID to check
-    /// @return bool True if attestation exists and is valid
-    function _isValidAttestation(bytes32 uid) private view returns (bool) {
+    /// @return bool True if attestation exists, is valid, and uses Project schema
+    function _isValidProjectAttestation(
+        bytes32 uid
+    ) private view returns (bool) {
         // Check if the attestation exists in EAS
         Attestation memory attestation = _eas.getAttestation(uid);
 
         // Attestation is valid if:
         // 1. It has been created (time > 0)
         // 2. It hasn't been revoked (revocationTime == 0)
-        // 3. It references the correct schema (optional additional check)
+        // 3. It uses the correct Project schema
         return
             attestation.time > 0 &&
             attestation.revocationTime == 0 &&

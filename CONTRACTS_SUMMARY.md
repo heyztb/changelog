@@ -61,6 +61,8 @@ uint256 fid           - Farcaster ID of shipper
 - FID must be > 0
 - Text must not be empty
 - Text must be ≤ 5000 characters
+- Links array must contain ≤ 10 links
+- Project reference (refUID) must not be empty
 - Project reference must exist and be valid
 - User must not have shipped in last 24 hours
 
@@ -100,13 +102,14 @@ Mock implementation of EAS for isolated unit testing.
 - Multi-user scenarios
 
 **ShipResolverTest** (`test/ShipResolver.t.sol`)
-- 14 comprehensive tests
-- Validation logic tests
+- 17 comprehensive tests
+- Validation logic tests (including multiple links, too many links)
 - Integration tests with StreakTracker
 - Fuzz tests with various inputs
 - Error condition tests
+- refUID validation tests
 
-**Total:** 40 tests, 100% passing
+**Total:** 43 tests, 100% passing
 
 ### Coverage Report
 
@@ -126,7 +129,10 @@ ShipResolver      100%         100%         100%        100%
 ✅ Midnight boundary conditions
 ✅ Longest streak tracking
 ✅ Invalid project references
+✅ Missing project references (empty refUID)
 ✅ Empty/too-long text validation
+✅ Multiple links support (up to 10)
+✅ Too many links rejection (>10)
 ✅ Unauthorized resolver attempts
 ✅ Rate limiting enforcement
 ✅ Integration flows end-to-end
@@ -150,6 +156,8 @@ forge script script/RegisterSchemas.s.sol \
   --broadcast \
   --verify
 ```
+
+**Note:** Ships use EAS's native `refUID` field to reference Projects, not schema data.
 
 ---
 
@@ -241,12 +249,14 @@ Revocable: false
 
 ### Ship Schema (To Be Registered)
 ```
-Schema: bytes32 projectRefUID, string text, string link, uint256 timestamp, uint256 fid
+Schema: string text, string[] links, uint256 timestamp, uint256 fid
 Resolver: ShipResolver (from deployment)
 Revocable: false
 ```
 
-**Purpose:** Daily updates that reference projects and trigger streak tracking.
+**Purpose:** Daily updates that reference projects (via refUID) and trigger streak tracking.
+
+**Key Design:** Ships use EAS's native `refUID` field to reference Project attestations, keeping the schema focused on update content. Links array supports multiple URLs (docs, PRs, demos, etc.).
 
 ---
 
@@ -306,8 +316,10 @@ Revocable: false
 ## 📚 Documentation
 
 ### Created Files
+**Created Files**
 - ✅ `README.md` - Comprehensive contract documentation
 - ✅ `DEPLOYMENT_GUIDE.md` - Step-by-step deployment instructions
+- ✅ `QUICK_REFERENCE.md` - Command cheat sheet
 - ✅ `.env.example` - Environment variable template
 - ✅ Inline NatSpec comments on all contracts
 - ✅ Test files with descriptive names

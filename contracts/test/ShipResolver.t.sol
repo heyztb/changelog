@@ -223,10 +223,12 @@ contract ShipResolverTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     function test_OnAttestValidShip() public {
+        string[] memory links = new string[](1);
+        links[0] = "https://example.com";
+
         bytes memory shipData = abi.encode(
-            PROJECT_REF_UID, // projectRefUID
             "Shipped feature X", // text
-            "https://example.com", // link
+            links, // links array
             block.timestamp, // timestamp
             FID_ALICE // fid
         );
@@ -237,7 +239,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID, // References project via native EAS field
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -266,10 +268,10 @@ contract ShipResolverTest is Test {
 
     function test_OnAttestConsecutiveDays() public {
         // Day 1
+        string[] memory links1 = new string[](0);
         bytes memory shipData1 = abi.encode(
-            PROJECT_REF_UID,
             "Day 1 ship",
-            "",
+            links1,
             block.timestamp,
             FID_ALICE
         );
@@ -280,7 +282,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -293,10 +295,10 @@ contract ShipResolverTest is Test {
         // Day 2
         vm.warp(block.timestamp + 1 days);
 
+        string[] memory links2 = new string[](0);
         bytes memory shipData2 = abi.encode(
-            PROJECT_REF_UID,
             "Day 2 ship",
-            "",
+            links2,
             block.timestamp,
             FID_ALICE
         );
@@ -307,7 +309,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -323,10 +325,10 @@ contract ShipResolverTest is Test {
     function test_RevertWhen_InvalidProjectReference() public {
         bytes32 invalidProjectRef = bytes32(uint256(9999));
 
+        string[] memory links = new string[](0);
         bytes memory shipData = abi.encode(
-            invalidProjectRef,
             "Test ship",
-            "",
+            links,
             block.timestamp,
             FID_ALICE
         );
@@ -337,7 +339,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: invalidProjectRef, // Invalid project reference
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -350,10 +352,10 @@ contract ShipResolverTest is Test {
     }
 
     function test_RevertWhen_InvalidFID() public {
+        string[] memory links = new string[](0);
         bytes memory shipData = abi.encode(
-            PROJECT_REF_UID,
             "Test ship",
-            "",
+            links,
             block.timestamp,
             0 // Invalid FID
         );
@@ -364,7 +366,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -377,10 +379,10 @@ contract ShipResolverTest is Test {
     }
 
     function test_RevertWhen_EmptyShipText() public {
+        string[] memory links = new string[](0);
         bytes memory shipData = abi.encode(
-            PROJECT_REF_UID,
             "", // Empty text
-            "",
+            links,
             block.timestamp,
             FID_ALICE
         );
@@ -391,7 +393,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -410,10 +412,10 @@ contract ShipResolverTest is Test {
             longText[i] = "a";
         }
 
+        string[] memory links = new string[](0);
         bytes memory shipData = abi.encode(
-            PROJECT_REF_UID,
             string(longText),
-            "",
+            links,
             block.timestamp,
             FID_ALICE
         );
@@ -424,7 +426,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -438,10 +440,10 @@ contract ShipResolverTest is Test {
 
     function test_RevertWhen_AlreadyShippedToday() public {
         // First ship
+        string[] memory links1 = new string[](0);
         bytes memory shipData1 = abi.encode(
-            PROJECT_REF_UID,
             "First ship",
-            "",
+            links1,
             block.timestamp,
             FID_ALICE
         );
@@ -452,7 +454,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -465,10 +467,10 @@ contract ShipResolverTest is Test {
         // Try to ship again within 24 hours
         vm.warp(block.timestamp + 12 hours);
 
+        string[] memory links2 = new string[](0);
         bytes memory shipData2 = abi.encode(
-            PROJECT_REF_UID,
             "Second ship",
-            "",
+            links2,
             block.timestamp,
             FID_ALICE
         );
@@ -479,7 +481,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -496,10 +498,10 @@ contract ShipResolverTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     function test_RevertWhen_Revoke() public {
+        string[] memory links = new string[](0);
         bytes memory shipData = abi.encode(
-            PROJECT_REF_UID,
             "Test ship",
-            "",
+            links,
             block.timestamp,
             FID_ALICE
         );
@@ -510,7 +512,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -530,10 +532,10 @@ contract ShipResolverTest is Test {
         assertFalse(resolver.hasShippedToday(FID_ALICE));
 
         // Ship
+        string[] memory links = new string[](0);
         bytes memory shipData = abi.encode(
-            PROJECT_REF_UID,
             "Test ship",
-            "",
+            links,
             block.timestamp,
             FID_ALICE
         );
@@ -544,7 +546,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -565,10 +567,10 @@ contract ShipResolverTest is Test {
         assertEq(resolver.getTimeUntilNextShip(FID_ALICE), 0);
 
         // Ship
+        string[] memory links = new string[](0);
         bytes memory shipData = abi.encode(
-            PROJECT_REF_UID,
             "Test ship",
-            "",
+            links,
             block.timestamp,
             FID_ALICE
         );
@@ -579,7 +581,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -607,10 +609,10 @@ contract ShipResolverTest is Test {
 
     function test_MultipleUsersCanShipSameDay() public {
         // Alice ships
+        string[] memory linksAlice = new string[](0);
         bytes memory shipDataAlice = abi.encode(
-            PROJECT_REF_UID,
             "Alice ship",
-            "",
+            linksAlice,
             block.timestamp,
             FID_ALICE
         );
@@ -621,7 +623,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -632,10 +634,10 @@ contract ShipResolverTest is Test {
         resolver.exposed_onAttest(attestationAlice, 0);
 
         // Bob ships same day
+        string[] memory linksBob = new string[](0);
         bytes memory shipDataBob = abi.encode(
-            PROJECT_REF_UID,
             "Bob ship",
-            "",
+            linksBob,
             block.timestamp,
             FID_BOB
         );
@@ -646,7 +648,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -668,20 +670,16 @@ contract ShipResolverTest is Test {
 
     function testFuzz_OnAttestWithValidData(
         uint256 fid,
-        string memory text,
-        string memory link
+        string memory text
     ) public {
         // Bound inputs
         fid = bound(fid, 1, type(uint128).max);
         vm.assume(bytes(text).length > 0 && bytes(text).length <= 5000);
 
-        bytes memory shipData = abi.encode(
-            PROJECT_REF_UID,
-            text,
-            link,
-            block.timestamp,
-            fid
-        );
+        string[] memory links = new string[](1);
+        links[0] = "https://example.com";
+
+        bytes memory shipData = abi.encode(text, links, block.timestamp, fid);
 
         Attestation memory attestation = Attestation({
             uid: keccak256(abi.encodePacked(fid, text)),
@@ -689,7 +687,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -703,16 +701,109 @@ contract ShipResolverTest is Test {
         assertEq(tracker.getCurrentStreak(fid), 1);
     }
 
+    function test_MultipleLinks() public {
+        string[] memory links = new string[](3);
+        links[0] = "https://github.com/user/repo/pull/123";
+        links[1] = "https://docs.project.com";
+        links[2] = "https://demo.project.com";
+
+        bytes memory shipData = abi.encode(
+            "Shipped feature with docs and demo",
+            links,
+            block.timestamp,
+            FID_ALICE
+        );
+
+        Attestation memory attestation = Attestation({
+            uid: bytes32(uint256(1)),
+            schema: SHIP_SCHEMA_UID,
+            time: uint64(block.timestamp),
+            expirationTime: 0,
+            revocationTime: 0,
+            refUID: PROJECT_REF_UID,
+            recipient: address(0),
+            attester: user,
+            revocable: false,
+            data: shipData
+        });
+
+        vm.prank(address(eas));
+        bool result = resolver.exposed_onAttest(attestation, 0);
+
+        assertTrue(result);
+        assertEq(tracker.getCurrentStreak(FID_ALICE), 1);
+    }
+
+    function test_RevertWhen_TooManyLinks() public {
+        string[] memory links = new string[](11); // MAX_LINKS is 10
+        for (uint256 i = 0; i < 11; i++) {
+            links[i] = "https://example.com";
+        }
+
+        bytes memory shipData = abi.encode(
+            "Too many links",
+            links,
+            block.timestamp,
+            FID_ALICE
+        );
+
+        Attestation memory attestation = Attestation({
+            uid: bytes32(uint256(1)),
+            schema: SHIP_SCHEMA_UID,
+            time: uint64(block.timestamp),
+            expirationTime: 0,
+            revocationTime: 0,
+            refUID: PROJECT_REF_UID,
+            recipient: address(0),
+            attester: user,
+            revocable: false,
+            data: shipData
+        });
+
+        vm.prank(address(eas));
+        vm.expectRevert(ShipResolver.TooManyLinks.selector);
+        resolver.exposed_onAttest(attestation, 0);
+    }
+
+    function test_RevertWhen_MissingProjectReference() public {
+        string[] memory links = new string[](0);
+        bytes memory shipData = abi.encode(
+            "Test ship",
+            links,
+            block.timestamp,
+            FID_ALICE
+        );
+
+        Attestation memory attestation = Attestation({
+            uid: bytes32(uint256(1)),
+            schema: SHIP_SCHEMA_UID,
+            time: uint64(block.timestamp),
+            expirationTime: 0,
+            revocationTime: 0,
+            refUID: bytes32(0), // No project reference
+            recipient: address(0),
+            attester: user,
+            revocable: false,
+            data: shipData
+        });
+
+        vm.prank(address(eas));
+        vm.expectRevert(ShipResolver.MissingProjectReference.selector);
+        resolver.exposed_onAttest(attestation, 0);
+    }
+
     /*//////////////////////////////////////////////////////////////
                         INTEGRATION TESTS
     //////////////////////////////////////////////////////////////*/
 
     function test_IntegrationFullShipFlow() public {
         // Day 1: Alice ships
+        string[] memory links1 = new string[](1);
+        links1[0] = "https://github.com/alice/auth";
+
         bytes memory shipData1 = abi.encode(
-            PROJECT_REF_UID,
             "Built authentication system",
-            "https://github.com/alice/auth",
+            links1,
             block.timestamp,
             FID_ALICE
         );
@@ -723,7 +814,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,
@@ -741,10 +832,10 @@ contract ShipResolverTest is Test {
         // Day 2: Alice ships again
         vm.warp(block.timestamp + 1 days);
 
+        string[] memory links2 = new string[](0);
         bytes memory shipData2 = abi.encode(
-            PROJECT_REF_UID,
             "Added OAuth providers",
-            "",
+            links2,
             block.timestamp,
             FID_ALICE
         );
@@ -755,7 +846,7 @@ contract ShipResolverTest is Test {
             time: uint64(block.timestamp),
             expirationTime: 0,
             revocationTime: 0,
-            refUID: bytes32(0),
+            refUID: PROJECT_REF_UID,
             recipient: address(0),
             attester: user,
             revocable: false,

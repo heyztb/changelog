@@ -141,9 +141,10 @@ The Ship schema must reference the deployed ShipResolver.
 
 1. Go to [Base Sepolia EAS](https://base-sepolia.easscan.org/schema/create)
 2. Fill in schema details:
-   - **Schema**: `bytes32 projectRefUID,string text,string link,uint256 timestamp,uint256 fid`
+   - **Schema**: `string text,string[] links,uint256 timestamp,uint256 fid`
    - **Resolver**: `<ShipResolver address from Phase 2>`
    - **Revocable**: `false` (IMPORTANT!)
+   - **Note**: Ships use EAS's native `refUID` field to reference Projects
 3. Click "Register Schema"
 4. Confirm transaction
 5. Save the Ship Schema UID
@@ -167,9 +168,10 @@ https://base-sepolia.easscan.org/schema/view/0xABC...
 ```
 
 Confirm:
-- Schema matches: `bytes32 projectRefUID,string text,string link,uint256 timestamp,uint256 fid`
+- Schema matches: `string text,string[] links,uint256 timestamp,uint256 fid`
 - Resolver points to your ShipResolver
 - Revocable: `false`
+- Ships reference Projects via `refUID` field (not in schema data)
 
 ### Phase 4: Test End-to-End
 
@@ -209,11 +211,10 @@ console.log("Project UID:", newProjectUID);
 #### Step 4.2: Create Test Ship Attestation
 
 ```typescript
-const encoder = new SchemaEncoder("bytes32 projectRefUID,string text,string link,uint256 timestamp,uint256 fid");
+const encoder = new SchemaEncoder("string text,string[] links,uint256 timestamp,uint256 fid");
 const shipData = encoder.encodeData([
-  { name: "projectRefUID", value: projectUID, type: "bytes32" },
   { name: "text", value: "Shipped feature X", type: "string" },
-  { name: "link", value: "https://github.com/user/repo", type: "string" },
+  { name: "links", value: ["https://github.com/user/repo/pull/123", "https://docs.example.com"], type: "string[]" },
   { name: "timestamp", value: Date.now(), type: "uint256" },
   { name: "fid", value: 12345, type: "uint256" }
 ]);
@@ -224,6 +225,7 @@ const tx = await eas.attest({
     recipient: ethers.constants.AddressZero,
     expirationTime: 0,
     revocable: false,
+    refUID: projectUID, // Reference Project attestation via EAS native field
     data: shipData
   }
 });

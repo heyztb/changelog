@@ -71,12 +71,13 @@ EAS resolver contract that validates ship attestations and updates streak tracki
 
 **Schema:**
 ```
-bytes32 projectRefUID
 string text
-string link
+string[] links
 uint256 timestamp
 uint256 fid
 ```
+
+**Key Design:** Ships use EAS's native `refUID` field to reference Project attestations, keeping the schema focused on the update content. The `links` array allows sharing multiple URLs (GitHub PR, docs, demo, etc.).
 
 ## 🚀 Quick Start
 
@@ -305,13 +306,12 @@ const eas = new EAS(EAS_CONTRACT_ADDRESS);
 eas.connect(signer);
 
 const encoder = new SchemaEncoder(
-  "bytes32 projectRefUID,string text,string link,uint256 timestamp,uint256 fid"
+  "string text,string[] links,uint256 timestamp,uint256 fid"
 );
 
 const encodedData = encoder.encodeData([
-  { name: "projectRefUID", value: projectUID, type: "bytes32" },
   { name: "text", value: "Shipped feature X", type: "string" },
-  { name: "link", value: "https://example.com", type: "string" },
+  { name: "links", value: ["https://github.com/user/repo/pull/123", "https://docs.example.com"], type: "string[]" },
   { name: "timestamp", value: Date.now(), type: "uint256" },
   { name: "fid", value: userFID, type: "uint256" }
 ]);
@@ -322,6 +322,7 @@ const tx = await eas.attest({
     recipient: ethers.constants.AddressZero,
     expirationTime: 0,
     revocable: false,
+    refUID: projectUID, // References Project attestation via EAS native field
     data: encodedData
   }
 });
@@ -357,7 +358,7 @@ query Ships($fid: Int!) {
     id
     attester
     recipient
-    refUID
+    refUID  # References the Project attestation
     data
     time
   }

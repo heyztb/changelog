@@ -20,7 +20,7 @@ contract RegisterSchemas is Script {
         "string name,string description,string website,address creator,uint256 createdAt";
 
     string public constant SHIP_SCHEMA =
-        "bytes32 projectRefUID,string text,string link,uint256 timestamp,uint256 fid";
+        "string text,string[] links,uint256 timestamp,uint256 fid";
 
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -66,11 +66,12 @@ contract RegisterSchemas is Script {
         console.log("");
 
         // Note: Ship schema must be registered AFTER deploying ShipResolver
-        // So we just log the schema for manual registration
+        // Ships reference Projects using EAS native refUID field
         console.log("Ship Schema (register AFTER deploying ShipResolver):");
         console.log("Schema:", SHIP_SCHEMA);
         console.log("Resolver: <ShipResolver address from Deploy.s.sol>");
         console.log("Revocable: false");
+        console.log("Note: Use refUID field to reference Project attestations");
         console.log("");
 
         vm.stopBroadcast();

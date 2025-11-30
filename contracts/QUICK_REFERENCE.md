@@ -48,9 +48,10 @@ forge script script/Deploy.s.sol \
 #### 4. Register Ship Schema
 Go to https://base-sepolia.easscan.org/schema/create
 
-- Schema: `bytes32 projectRefUID,string text,string link,uint256 timestamp,uint256 fid`
+- Schema: `string text,string[] links,uint256 timestamp,uint256 fid`
 - Resolver: `<ShipResolver address>`
 - Revocable: `false`
+- Note: Ships use EAS's native `refUID` field to reference Projects
 
 **Save the Ship Schema UID!**
 
@@ -134,12 +135,13 @@ uint256 createdAt
 
 ### Ship Schema
 ```
-bytes32 projectRefUID
 string text
-string link
+string[] links
 uint256 timestamp
 uint256 fid
 ```
+
+**Note:** Ships reference Projects using EAS's native `refUID` field (not in schema data).
 
 ---
 
