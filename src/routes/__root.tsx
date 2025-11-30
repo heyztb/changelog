@@ -60,7 +60,7 @@ function ConnectWallet() {
       size="sm"
       onClick={() => {
         if (injectedConnector) {
-          connect({ connector: injectedConnector });
+          connect({ connector: injectedConnector, chainId: base.id });
         }
       }}
       disabled={!injectedConnector}
