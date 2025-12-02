@@ -6,11 +6,19 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { getAllShips } from "@/lib/mock-data";
-import { useUserProjects } from "@/lib/useUserProjects";
+import { useUserProjects } from "@/hooks/useUserProjects";
+import { WelcomeNewUserModal } from "@/components/WelcomeNewUserModal";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
 });
+
+const hasUserOnboardedKey = "changelog-user-onboarding-completed";
+
+const hasUserOnboarded = () => {
+  const storedValue = localStorage.getItem(hasUserOnboardedKey);
+  return storedValue === "true";
+};
 
 const getTagline = () => {
   const hour = new Date().getHours();
@@ -89,6 +97,7 @@ function IndexComponent() {
   const [showLinkWarning, setShowLinkWarning] = useState(false);
   const [pendingLink, setPendingLink] = useState<string | null>(null);
   const tagline = useMemo(() => getTagline(), []);
+  const onboarded = useMemo(() => hasUserOnboarded(), []);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { projects, addProject, isLoaded } = useUserProjects();
@@ -319,6 +328,10 @@ function IndexComponent() {
         isOpen={showLinkWarning}
         onClose={() => setShowLinkWarning(false)}
         onConfirm={handleConfirmLink}
+      />
+      <WelcomeNewUserModal
+        isOpen={hasUserOnboarded() === false}
+        onClose={() => localStorage.setItem(hasUserOnboardedKey, "true")}
       />
     </div>
   );
