@@ -18,6 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Wallet, LogOut } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ModeToggle } from "@/components/ModeToggle";
+import { sdk } from "@farcaster/miniapp-sdk";
+import { Context } from "@farcaster/miniapp-core";
+import { logger } from "@/lib/logger";
+import Nav from "@/components/Nav";
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -75,12 +79,18 @@ function ConnectWallet() {
 
 function RootComponent() {
   const [isMiniapp, setIsMiniapp] = useState<boolean | null>(null);
+  const [userFid, setUserFid] = useState(0);
 
   useEffect(() => {
     (async () => {
       const miniappStatus = await sdk.isInMiniApp();
       setIsMiniapp(miniappStatus);
       if (miniappStatus) {
+        const context = await sdk.context;
+        logger.info("Miniapp context initialized", context);
+        if (context && context.user && context.user.fid) {
+          setUserFid(context.user.fid);
+        }
         await sdk.actions.ready();
       }
     })();
@@ -101,6 +111,7 @@ function RootComponent() {
             )}
             <main className="flex-1 container mx-auto px-4 py-8">
               <Outlet />
+              {isMiniapp && <Nav fid={userFid} />}
             </main>
           </div>
           {process.env.NODE_ENV !== "production" && <TanStackRouterDevtools />}

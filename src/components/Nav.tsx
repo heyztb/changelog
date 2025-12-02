@@ -1,27 +1,37 @@
 import { Link } from "@tanstack/react-router";
-import { Scroll } from "lucide-react";
+import { Scroll, SquareUserRound } from "lucide-react";
 
-function Nav() {
+type NavProps = {
+  fid: number;
+};
+
+const Nav: React.FC<NavProps> = ({ fid }) => {
   return (
-    <nav className="border-b bg-background">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center justify-center">
-            <Link
-              to="/"
-              className="hover:text-primary transition-colors"
-              activeProps={{
-                className: "font-bold text-primary",
-              }}
-              activeOptions={{ exact: true }}
-            >
-              Build in public
-            </Link>
-          </div>
-        </div>
+    <nav className="fixed bottom-0 left-0 right-0 border-t bg-background z-10">
+      <div className="flex items-stretch h-12">
+        <Link
+          to="/"
+          className="flex-1 flex items-center justify-center hover:bg-accent transition-colors"
+          activeProps={{
+            className: "text-primary bg-accent",
+          }}
+          activeOptions={{ exact: true }}
+        >
+          <Scroll className="w-6 h-6" />
+        </Link>
+        <Link
+          to={`/user/${fid}`}
+          className="flex-1 flex items-center justify-center hover:bg-accent transition-colors"
+          activeProps={{
+            className: "text-primary bg-accent",
+          }}
+          activeOptions={{ exact: true }}
+        >
+          <SquareUserRound className="w-6 h-6" />
+        </Link>
       </div>
     </nav>
   );
-}
+};
 
 export default Nav;
