@@ -192,7 +192,7 @@ function IndexComponent() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="What did you ship today?"
+            placeholder="What did you make progress on today?"
             className="w-full bg-transparent border-none text-black dark:text-white placeholder:text-gray-400 resize-none text-base focus-visible:ring-0 focus-visible:ring-offset-0 min-h-6 max-h-[200px]"
             rows={1}
           />
