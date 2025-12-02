@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-const STORAGE_KEY = "changelog-user-projects";
+const PROJECTS_LOCAL_STORAGE_KEY = "changelog-user-projects";
 
 export function useUserProjects() {
   const [projects, setProjects] = useState<string[]>([]);
@@ -9,7 +9,7 @@ export function useUserProjects() {
   // Load projects from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(PROJECTS_LOCAL_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -26,7 +26,10 @@ export function useUserProjects() {
   useEffect(() => {
     if (isLoaded) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+        localStorage.setItem(
+          PROJECTS_LOCAL_STORAGE_KEY,
+          JSON.stringify(projects),
+        );
       } catch (e) {
         console.error("Failed to save projects to localStorage:", e);
       }
