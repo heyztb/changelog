@@ -21,6 +21,10 @@ const hasUserOnboarded = () => {
 };
 
 const getTagline = () => {
+  if (!hasUserOnboarded()) {
+    return "Welcome to Changelog! 🚀";
+  }
+
   const hour = new Date().getHours();
 
   const morningTaglines = [
@@ -97,7 +101,7 @@ function IndexComponent() {
   const [showLinkWarning, setShowLinkWarning] = useState(false);
   const [pendingLink, setPendingLink] = useState<string | null>(null);
   const tagline = useMemo(() => getTagline(), []);
-  const onboarded = useMemo(() => hasUserOnboarded(), []);
+  const [onboarded, setOnboarded] = useState(hasUserOnboarded());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { projects, addProject, isLoaded } = useUserProjects();
@@ -330,8 +334,11 @@ function IndexComponent() {
         onConfirm={handleConfirmLink}
       />
       <WelcomeNewUserModal
-        isOpen={hasUserOnboarded() === false}
-        onClose={() => localStorage.setItem(hasUserOnboardedKey, "true")}
+        isOpen={!onboarded}
+        onClose={() => {
+          localStorage.setItem(hasUserOnboardedKey, "true");
+          setOnboarded(true);
+        }}
       />
     </div>
   );
