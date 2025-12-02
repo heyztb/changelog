@@ -7,7 +7,7 @@
   "scripts": {
     "generate-routes": "tsr generate",
     "watch-routes": "tsr watch",
-    "dev": "bun run watch-routes & bun --hot src/index.ts",
+    "dev": "bun --hot src/index.ts",
     "build": "bun run generate-routes && bun run build.ts",
     "start": "NODE_ENV=production bun src/index.ts"
   },
