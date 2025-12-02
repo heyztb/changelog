@@ -12,14 +12,12 @@ import {
 import { base, baseSepolia } from "wagmi/chains";
 import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
 import { useEffect, useState } from "react";
-import { sdk } from "@farcaster/miniapp-sdk";
 import { useConnect, useDisconnect } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Wallet, LogOut } from "lucide-react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ModeToggle } from "@/components/ModeToggle";
 import { sdk } from "@farcaster/miniapp-sdk";
-import { Context } from "@farcaster/miniapp-core";
 import { logger } from "@/lib/logger";
 import Nav from "@/components/Nav";
 
