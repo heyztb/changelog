@@ -1,7 +1,6 @@
 // changelog/src/hooks/useLinkWarning.ts
 import { useCallback, useState } from "react";
-
-const SKIP_LINK_WARNING_KEY = "skip-link-warning";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 /**
  * useLinkWarning
@@ -34,7 +33,7 @@ export function useLinkWarning() {
 
       // If the user has opted out of the warning, open immediately.
       try {
-        if (localStorage.getItem(SKIP_LINK_WARNING_KEY) === "true") {
+        if (localStorage.getItem(STORAGE_KEYS.SKIP_LINK_WARNING) === "true") {
           window.open(url, "_blank", "noopener,noreferrer");
           return;
         }
@@ -78,6 +77,5 @@ export function useLinkWarning() {
     handleLinkClick,
     handleConfirmLink,
     handleCancel,
-    SKIP_LINK_WARNING_KEY,
   } as const;
 }

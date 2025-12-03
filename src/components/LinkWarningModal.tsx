@@ -1,6 +1,7 @@
 import { AlertTriangle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 interface LinkWarningModalProps {
   isOpen: boolean;
@@ -30,7 +31,11 @@ export function LinkWarningModal({
 
   const handleConfirm = () => {
     if (dontShowAgain) {
-      localStorage.setItem("skip-link-warning", "true");
+      try {
+        localStorage.setItem(STORAGE_KEYS.SKIP_LINK_WARNING, "true");
+      } catch {
+        /* ignore storage errors */
+      }
     }
     onConfirm();
   };

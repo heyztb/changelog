@@ -1,15 +1,20 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const ONBOARDING_STORAGE_KEY = "changelog-user-onboarding-completed";
+export const ONBOARDING_STORAGE_KEY = STORAGE_KEYS.USER_ONBOARDING;
 
 export const hasUserOnboarded = () => {
-  const storedValue = localStorage.getItem(ONBOARDING_STORAGE_KEY);
-  return storedValue === "true";
+  try {
+    const storedValue = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    return storedValue === "true";
+  } catch {
+    return false;
+  }
 };
 
 export const getTagline = () => {
