@@ -10,6 +10,7 @@ import { useUserProjects } from "@/hooks/useUserProjects";
 import { WelcomeNewUserModal } from "@/components/WelcomeNewUserModal";
 import { getTagline } from "@/lib/utils";
 import { useLinkWarning } from "@/hooks/useLinkWarning";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -29,15 +30,7 @@ function IndexComponent() {
     handleCancel,
   } = useLinkWarning();
   const tagline = useMemo(() => getTagline(), []);
-  const [onboarded, setOnboarded] = useState(() => {
-    try {
-      return (
-        localStorage.getItem("changelog-user-onboarding-completed") === "true"
-      );
-    } catch {
-      return false;
-    }
-  });
+  const { isOnboarded, completeOnboarding } = useOnboarding();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { projects, addProject, isLoaded } = useUserProjects();
@@ -251,13 +244,7 @@ function IndexComponent() {
         onClose={handleCancel}
         onConfirm={handleConfirmLink}
       />
-      <WelcomeNewUserModal
-        isOpen={!onboarded}
-        onClose={() => {
-          localStorage.setItem("changelog-user-onboarding-completed", "true");
-          setOnboarded(true);
-        }}
-      />
+      <WelcomeNewUserModal isOpen={!isOnboarded} onClose={completeOnboarding} />
     </div>
   );
 }
