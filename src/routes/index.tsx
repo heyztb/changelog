@@ -8,7 +8,8 @@ import { ShipTimeline } from "@/components/ShipTimeline";
 import { getAllShips } from "@/lib/mock-data";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { WelcomeNewUserModal } from "@/components/WelcomeNewUserModal";
-import { getTagline, hasUserOnboarded, ONBOARDING_STORAGE_KEY } from "@/lib/utils";
+import { getTagline } from "@/lib/utils";
+import { useLinkWarning } from "@/hooks/useLinkWarning";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -20,35 +21,31 @@ function IndexComponent() {
   const [showProjectDropdown, setShowProjectDropdown] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
-  const [showLinkWarning, setShowLinkWarning] = useState(false);
-  const [pendingLink, setPendingLink] = useState<string | null>(null);
+  const {
+    showLinkWarning,
+    setShowLinkWarning,
+    handleLinkClick,
+    handleConfirmLink,
+    handleCancel,
+  } = useLinkWarning();
   const tagline = useMemo(() => getTagline(), []);
-  const [onboarded, setOnboarded] = useState(hasUserOnboarded());
+  const [onboarded, setOnboarded] = useState(() => {
+    try {
+      return (
+        localStorage.getItem("changelog-user-onboarding-completed") === "true"
+      );
+    } catch {
+      return false;
+    }
+  });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { projects, addProject, isLoaded } = useUserProjects();
   const ships = getAllShips();
 
-  const handleLinkClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    url: string,
-  ) => {
-    e.preventDefault();
-    if (localStorage.getItem("skip-link-warning") === "true") {
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    setPendingLink(url);
-    setShowLinkWarning(true);
-  };
-
-  const handleConfirmLink = () => {
-    if (pendingLink) {
-      window.open(pendingLink, "_blank", "noopener,noreferrer");
-      setShowLinkWarning(false);
-      setPendingLink(null);
-    }
-  };
+  // Link handling is now delegated to `useLinkWarning` hook.
+  // The hook provides `handleLinkClick` and `handleConfirmLink` which are used
+  // by the timeline and the LinkWarningModal respectively.
 
   const handleSubmit = () => {
     if (message.trim() && selectedProject) {
@@ -257,7 +254,11 @@ function IndexComponent() {
       <WelcomeNewUserModal
         isOpen={!onboarded}
         onClose={() => {
-          localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
+          try {
+            localStorage.setItem("changelog-user-onboarding-completed", "true");
+          } catch {
+            /* ignore storage errors */
+          }
           setOnboarded(true);
         }}
       />

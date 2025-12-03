@@ -3,7 +3,8 @@ import { ArrowLeft, Flame, Folder, Package } from "lucide-react";
 import { getUserByFid } from "@/lib/mock-data";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
-import { useState } from "react";
+import { useLinkWarning } from "@/hooks/useLinkWarning";
+import { getTimeAgo } from "@/lib/utils";
 
 export const Route = createFileRoute("/user/$fid")({
   component: UserProfileComponent,
@@ -12,29 +13,12 @@ export const Route = createFileRoute("/user/$fid")({
 function UserProfileComponent() {
   const { fid } = Route.useParams();
   const user = getUserByFid(parseInt(fid, 10));
-  const [showLinkWarning, setShowLinkWarning] = useState(false);
-  const [pendingLink, setPendingLink] = useState<string | null>(null);
+  const { showLinkWarning, handleLinkClick, handleConfirmLink, handleCancel } =
+    useLinkWarning();
 
-  const handleLinkClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    url: string,
-  ) => {
-    e.preventDefault();
-    if (localStorage.getItem("skip-link-warning") === "true") {
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    setPendingLink(url);
-    setShowLinkWarning(true);
-  };
+  // Link handling delegated to `useLinkWarning` hook (handleLinkClick / handleConfirmLink / handleCancel).
 
-  const handleConfirmLink = () => {
-    if (pendingLink) {
-      window.open(pendingLink, "_blank", "noopener,noreferrer");
-      setShowLinkWarning(false);
-      setPendingLink(null);
-    }
-  };
+  // Confirmation behavior is provided by `useLinkWarning().handleConfirmLink`.
 
   if (!user) {
     return (
@@ -137,23 +121,11 @@ function UserProfileComponent() {
 
       <LinkWarningModal
         isOpen={showLinkWarning}
-        onClose={() => setShowLinkWarning(false)}
+        onClose={handleCancel}
         onConfirm={handleConfirmLink}
       />
     </div>
   );
 }
 
-function getTimeAgo(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffHours < 1) return "just now";
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays === 1) return "yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  return `${Math.floor(diffDays / 30)}mo ago`;
-}
+/* `getTimeAgo` moved to `src/lib/utils` and is imported at the top of this file. */
