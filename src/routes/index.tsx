@@ -1,8 +1,8 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
-import { Paperclip, ArrowUp, ChevronDown, Plus } from "lucide-react";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { Paperclip, ArrowUp } from "lucide-react";
+import { useState, useMemo } from "react";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { getAllShips } from "@/lib/mock-data";
@@ -11,6 +11,7 @@ import { WelcomeNewUserModal } from "@/components/WelcomeNewUserModal";
 import { getTagline } from "@/lib/utils";
 import { useLinkWarning } from "@/hooks/useLinkWarning";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import ProjectSelector from "@/components/ProjectSelector";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -19,19 +20,10 @@ export const Route = createFileRoute("/")({
 function IndexComponent() {
   const [message, setMessage] = useState("");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [showProjectDropdown, setShowProjectDropdown] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
-  const [showNewProjectInput, setShowNewProjectInput] = useState(false);
-  const {
-    showLinkWarning,
-    setShowLinkWarning,
-    handleLinkClick,
-    handleConfirmLink,
-    handleCancel,
-  } = useLinkWarning();
+  const { showLinkWarning, handleLinkClick, handleConfirmLink, handleCancel } =
+    useLinkWarning();
   const tagline = useMemo(() => getTagline(), []);
   const { isOnboarded, completeOnboarding } = useOnboarding();
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { projects, addProject, isLoaded } = useUserProjects();
   const ships = getAllShips();
@@ -53,43 +45,6 @@ function IndexComponent() {
       handleSubmit();
     }
   };
-
-  const handleSelectProject = (project: string) => {
-    if (selectedProject === project) {
-      setSelectedProject(null);
-    } else {
-      setSelectedProject(project);
-    }
-    setShowProjectDropdown(false);
-    setShowNewProjectInput(false);
-    setNewProjectName("");
-  };
-
-  const handleCreateProject = () => {
-    if (newProjectName.trim()) {
-      const name = newProjectName.trim();
-      addProject(name);
-      setSelectedProject(name);
-      setShowProjectDropdown(false);
-      setShowNewProjectInput(false);
-      setNewProjectName("");
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setShowProjectDropdown(false);
-        setShowNewProjectInput(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <div className="flex flex-col items-center mt-12 min-h-[80vh]">
@@ -119,105 +74,13 @@ function IndexComponent() {
               </Button>
 
               {/* Project selector */}
-              <div className="relative" ref={dropdownRef}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowProjectDropdown(!showProjectDropdown)}
-                  className={`rounded-full h-9 px-3 hover:bg-gray-100 dark:hover:bg-neutral-700 ${
-                    selectedProject
-                      ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20"
-                      : "text-gray-600 dark:text-gray-300"
-                  }`}
-                >
-                  {selectedProject || "Select project"}
-                  <ChevronDown className="w-4 h-4 ml-1" />
-                </Button>
-
-                {showProjectDropdown && (
-                  <div className="absolute top-full left-0 mt-2 w-56 rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-lg z-50 overflow-hidden">
-                    <div className="py-2">
-                      {isLoaded &&
-                        projects.length === 0 &&
-                        !showNewProjectInput && (
-                          <p className="px-4 py-2 text-sm text-gray-500 dark:text-neutral-400">
-                            No projects yet. Create one!
-                          </p>
-                        )}
-
-                      {projects.map((project) => (
-                        <button
-                          key={project}
-                          onClick={() => handleSelectProject(project)}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors ${
-                            selectedProject === project
-                              ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20"
-                              : "text-gray-900 dark:text-white"
-                          }`}
-                        >
-                          {project}
-                        </button>
-                      ))}
-
-                      <div className="border-t border-gray-200 dark:border-neutral-700 mt-2 pt-2">
-                        {showNewProjectInput ? (
-                          <div className="px-3 py-2">
-                            <input
-                              type="text"
-                              value={newProjectName}
-                              onChange={(e) =>
-                                setNewProjectName(e.target.value)
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  handleCreateProject();
-                                }
-                                if (e.key === "Escape") {
-                                  setShowNewProjectInput(false);
-                                  setNewProjectName("");
-                                }
-                              }}
-                              placeholder="Project name"
-                              className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-neutral-600 bg-gray-50 dark:bg-neutral-700 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                              autoFocus
-                            />
-                            <div className="flex gap-2 mt-2">
-                              <Button
-                                size="sm"
-                                onClick={handleCreateProject}
-                                disabled={!newProjectName.trim()}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-8"
-                              >
-                                Create
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  setShowNewProjectInput(false);
-                                  setNewProjectName("");
-                                }}
-                                className="rounded-lg h-8"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setShowNewProjectInput(true)}
-                            className="w-full text-left px-4 py-2 text-sm text-emerald-600 dark:text-emerald-400 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors flex items-center gap-2"
-                          >
-                            <Plus className="w-4 h-4" />
-                            New project
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <ProjectSelector
+                selectedProject={selectedProject}
+                onSelectProject={(p) => setSelectedProject(p)}
+                projects={projects}
+                addProject={addProject}
+                isLoaded={isLoaded}
+              />
             </div>
 
             <Button
