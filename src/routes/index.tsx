@@ -130,7 +130,6 @@ function IndexComponent() {
 
   const handleSubmit = () => {
     if (message.trim() && selectedProject) {
-      console.log("Sending ship:", { message, project: selectedProject });
       setMessage("");
       setSelectedProject(null);
     }

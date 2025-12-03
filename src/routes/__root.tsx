@@ -85,7 +85,6 @@ function RootComponent() {
       setIsMiniapp(miniappStatus);
       if (miniappStatus) {
         const context = await sdk.context;
-        logger.info("Miniapp context initialized", context);
         if (context && context.user && context.user.fid) {
           setUserFid(context.user.fid);
         }
