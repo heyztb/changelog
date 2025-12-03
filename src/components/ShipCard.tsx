@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "@tanstack/react-router";
 import { ExternalLink, Folder } from "lucide-react";
 import type { Ship } from "@/lib/types";
@@ -8,7 +9,11 @@ interface ShipCardProps {
   showProject?: boolean;
 }
 
-export function ShipCard({
+/**
+ * Presentational component for a single ship entry.
+ * Wrapped with React.memo below to avoid unnecessary re-renders when props are unchanged.
+ */
+function ShipCardComponent({
   ship,
   onLinkClick,
   showProject = true,
@@ -88,3 +93,8 @@ export function ShipCard({
     </div>
   );
 }
+
+const ShipCard = React.memo(ShipCardComponent);
+ShipCard.displayName = "ShipCard";
+
+export { ShipCard };

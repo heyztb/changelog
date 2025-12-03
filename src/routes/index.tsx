@@ -2,13 +2,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { Paperclip, ArrowUp } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { getAllShips } from "@/lib/mock-data";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { WelcomeNewUserModal } from "@/components/WelcomeNewUserModal";
-import { getTagline } from "@/lib/utils";
+import useTagline from "@/hooks/useTagline";
 import { useLinkWarning } from "@/hooks/useLinkWarning";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import ProjectSelector from "@/components/ProjectSelector";
@@ -22,7 +22,7 @@ function IndexComponent() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const { showLinkWarning, handleLinkClick, handleConfirmLink, handleCancel } =
     useLinkWarning();
-  const tagline = useMemo(() => getTagline(), []);
+  const { tagline } = useTagline();
   const { isOnboarded, completeOnboarding } = useOnboarding();
 
   const { projects, addProject, isLoaded } = useUserProjects();
