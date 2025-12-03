@@ -248,17 +248,13 @@ function IndexComponent() {
 
       <LinkWarningModal
         isOpen={showLinkWarning}
-        onClose={() => setShowLinkWarning(false)}
+        onClose={handleCancel}
         onConfirm={handleConfirmLink}
       />
       <WelcomeNewUserModal
         isOpen={!onboarded}
         onClose={() => {
-          try {
-            localStorage.setItem("changelog-user-onboarding-completed", "true");
-          } catch {
-            /* ignore storage errors */
-          }
+          localStorage.setItem("changelog-user-onboarding-completed", "true");
           setOnboarded(true);
         }}
       />
