@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.30;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@solady/auth/Ownable.sol";
 import {IStreakTracker} from "./interfaces/IStreakTracker.sol";
 
 /// @title StreakTracker
@@ -61,7 +61,9 @@ contract StreakTracker is IStreakTracker, Ownable {
 
     /// @notice Constructor sets the initial owner
     /// @param initialOwner The address that will own the contract
-    constructor(address initialOwner) Ownable(initialOwner) {}
+    constructor(address initialOwner) {
+        _initializeOwner(initialOwner);
+    }
 
     /// @notice Authorizes or deauthorizes a resolver
     /// @dev Only owner can call this function

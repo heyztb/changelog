@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.30;
 
 import {SchemaResolver} from "@eas/resolver/SchemaResolver.sol";
 import {IEAS, Attestation} from "@eas/IEAS.sol";
 import {IStreakTracker} from "./interfaces/IStreakTracker.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@solady/auth/Ownable.sol";
 
 /// @title ShipResolver
 /// @notice Resolver contract for Ship attestations on EAS
@@ -81,7 +81,8 @@ contract ShipResolver is SchemaResolver, Ownable {
         IStreakTracker _streakTracker,
         bytes32 _projectSchemaUID,
         address initialOwner
-    ) SchemaResolver(_eas) Ownable(initialOwner) {
+    ) SchemaResolver(_eas) {
+        _initializeOwner(initialOwner);
         streakTracker = _streakTracker;
         projectSchemaUID = _projectSchemaUID;
     }
