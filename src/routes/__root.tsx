@@ -61,7 +61,6 @@ function RootComponent() {
               {isMiniapp && <Nav fid={userFid} />}
             </main>
           </div>
-          {process.env.NODE_ENV !== "production" && <TanStackRouterDevtools />}
         </QueryClientProvider>
       </WagmiProvider>
     </ThemeProvider>
