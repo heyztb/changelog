@@ -62,5 +62,3 @@ export function useTagline() {
 
   return { tagline, refresh } as const;
 }
-
-export default useTagline;
