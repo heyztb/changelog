@@ -1,18 +1,3 @@
-/* changelog/src/components/ConnectWallet.tsx
- *
- * Consolidated ConnectWallet component that centralizes wallet status checks
- * and connector logic previously in __root.tsx.
- *
- * Behavior:
- * - When connected (isConnected && address): shows truncated address + Disconnect button.
- * - When not connected: attempts to connect using an injected connector (MetaMask),
- *   falling back to the first available connector. Button is disabled if no connectors.
- *
- * Accessibility:
- * - Buttons have descriptive labels.
- * - Address is presented as text with an accessible description.
- */
-
 import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Wallet, LogOut } from "lucide-react";

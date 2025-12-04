@@ -9,10 +9,6 @@ interface ShipCardProps {
   showProject?: boolean;
 }
 
-/**
- * Presentational component for a single ship entry.
- * Wrapped with React.memo below to avoid unnecessary re-renders when props are unchanged.
- */
 function ShipCardComponent({
   ship,
   onLinkClick,

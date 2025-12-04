@@ -16,10 +16,6 @@ function UserProfileComponent() {
   const { showLinkWarning, handleLinkClick, handleConfirmLink, handleCancel } =
     useLinkWarning();
 
-  // Link handling delegated to `useLinkWarning` hook (handleLinkClick / handleConfirmLink / handleCancel).
-
-  // Confirmation behavior is provided by `useLinkWarning().handleConfirmLink`.
-
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -39,7 +35,6 @@ function UserProfileComponent() {
   return (
     <div className="flex flex-col items-center mt-8 min-h-[80vh]">
       <div className="w-full max-w-3xl px-4">
-        {/* Back button */}
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6"
@@ -69,7 +64,6 @@ function UserProfileComponent() {
           </div>
         </div>
 
-        {/* Projects section */}
         <div className="mb-10">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Folder className="w-5 h-5" />
@@ -105,7 +99,6 @@ function UserProfileComponent() {
           </div>
         </div>
 
-        {/* Recent ships section */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
             Recent Ships
@@ -127,5 +120,3 @@ function UserProfileComponent() {
     </div>
   );
 }
-
-/* `getTimeAgo` moved to `src/lib/utils` and is imported at the top of this file. */

@@ -1,10 +1,3 @@
-/**
- * This file is the entry point for the React app, it sets up the root
- * element and renders the RouterProvider with the configured router.
- *
- * It is included in `src/index.html`.
- */
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";

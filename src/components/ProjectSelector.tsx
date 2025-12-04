@@ -8,24 +8,9 @@ type ProjectSelectorProps = {
   projects: string[];
   addProject: (name: string) => boolean | void;
   isLoaded: boolean;
-  // Optional className for the root wrapper/button if callers want to tweak styling
   className?: string;
 };
 
-/**
- * ProjectSelector
- *
- * Extracted project dropdown used on the homepage compose box.
- *
- * Props:
- * - selectedProject: currently selected project name or null
- * - onSelectProject: called with the project name to select, or null to clear
- * - projects: array of project names
- * - addProject: callback to persist a new project (should return truthy on success)
- * - isLoaded: whether projects have finished loading (for empty-state messaging)
- *
- * The component manages its own dropdown state and outside-click handling.
- */
 export default function ProjectSelector({
   selectedProject,
   onSelectProject,
@@ -42,7 +27,10 @@ export default function ProjectSelector({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
         setShowNewProjectInput(false);
       }
@@ -90,7 +78,6 @@ export default function ProjectSelector({
         size="sm"
         onClick={() => {
           setOpen((s) => !s);
-          // reset new project UI when toggling
           setShowNewProjectInput(false);
           setNewProjectName("");
         }}

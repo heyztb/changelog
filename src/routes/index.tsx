@@ -28,10 +28,6 @@ function IndexComponent() {
   const { projects, addProject, isLoaded } = useUserProjects();
   const ships = getAllShips();
 
-  // Link handling is now delegated to `useLinkWarning` hook.
-  // The hook provides `handleLinkClick` and `handleConfirmLink` which are used
-  // by the timeline and the LinkWarningModal respectively.
-
   const handleSubmit = () => {
     if (message.trim() && selectedProject) {
       setMessage("");
@@ -73,7 +69,6 @@ function IndexComponent() {
                 Attach
               </Button>
 
-              {/* Project selector */}
               <ProjectSelector
                 selectedProject={selectedProject}
                 onSelectProject={(p) => setSelectedProject(p)}

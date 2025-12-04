@@ -5,7 +5,6 @@ export function useUserProjects() {
   const [projects, setProjects] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load projects from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.USER_PROJECTS);
@@ -21,7 +20,6 @@ export function useUserProjects() {
     setIsLoaded(true);
   }, []);
 
-  // Save projects to localStorage whenever they change
   useEffect(() => {
     if (isLoaded) {
       try {
@@ -40,7 +38,6 @@ export function useUserProjects() {
     if (!trimmed) return false;
 
     setProjects((prev) => {
-      // Check if project already exists (case-insensitive)
       const exists = prev.some(
         (p) => p.toLowerCase() === trimmed.toLowerCase(),
       );
