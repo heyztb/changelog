@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "@tanstack/react-router";
 import { ExternalLink, Folder } from "lucide-react";
 import type { Ship } from "@/lib/types";
@@ -8,7 +9,7 @@ interface ShipCardProps {
   showProject?: boolean;
 }
 
-export function ShipCard({
+function ShipCardComponent({
   ship,
   onLinkClick,
   showProject = true,
@@ -20,6 +21,7 @@ export function ShipCard({
       <Link
         to="/user/$fid"
         params={{ fid: ship.fid.toString() }}
+        aria-label={`View ${ship.displayName}'s profile`}
         className="absolute left-0 top-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-purple-500 shrink-0 ring-4 ring-white dark:ring-neutral-950 z-10 hover:ring-blue-200 dark:hover:ring-blue-900 transition-all cursor-pointer"
       />
 
@@ -29,6 +31,7 @@ export function ShipCard({
             <Link
               to="/user/$fid"
               params={{ fid: ship.fid.toString() }}
+              aria-label={`View ${ship.displayName}'s profile`}
               className="font-semibold text-gray-900 dark:text-white tracking-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               {ship.displayName}
@@ -86,3 +89,8 @@ export function ShipCard({
     </div>
   );
 }
+
+const ShipCard = React.memo(ShipCardComponent);
+ShipCard.displayName = "ShipCard";
+
+export { ShipCard };

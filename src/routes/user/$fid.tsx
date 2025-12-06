@@ -3,7 +3,8 @@ import { ArrowLeft, Flame, Folder, Package } from "lucide-react";
 import { getUserByFid } from "@/lib/mock-data";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
-import { useState } from "react";
+import { useLinkWarning } from "@/hooks/useLinkWarning";
+import { getTimeAgo } from "@/lib/utils";
 
 export const Route = createFileRoute("/user/$fid")({
   component: UserProfileComponent,
@@ -12,29 +13,8 @@ export const Route = createFileRoute("/user/$fid")({
 function UserProfileComponent() {
   const { fid } = Route.useParams();
   const user = getUserByFid(parseInt(fid, 10));
-  const [showLinkWarning, setShowLinkWarning] = useState(false);
-  const [pendingLink, setPendingLink] = useState<string | null>(null);
-
-  const handleLinkClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    url: string,
-  ) => {
-    e.preventDefault();
-    if (localStorage.getItem("skip-link-warning") === "true") {
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    setPendingLink(url);
-    setShowLinkWarning(true);
-  };
-
-  const handleConfirmLink = () => {
-    if (pendingLink) {
-      window.open(pendingLink, "_blank", "noopener,noreferrer");
-      setShowLinkWarning(false);
-      setPendingLink(null);
-    }
-  };
+  const { showLinkWarning, handleLinkClick, handleConfirmLink, handleCancel } =
+    useLinkWarning();
 
   if (!user) {
     return (
@@ -55,7 +35,6 @@ function UserProfileComponent() {
   return (
     <div className="flex flex-col items-center mt-8 min-h-[80vh]">
       <div className="w-full max-w-3xl px-4">
-        {/* Back button */}
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-6"
@@ -85,7 +64,6 @@ function UserProfileComponent() {
           </div>
         </div>
 
-        {/* Projects section */}
         <div className="mb-10">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Folder className="w-5 h-5" />
@@ -121,7 +99,6 @@ function UserProfileComponent() {
           </div>
         </div>
 
-        {/* Recent ships section */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
             Recent Ships
@@ -137,23 +114,9 @@ function UserProfileComponent() {
 
       <LinkWarningModal
         isOpen={showLinkWarning}
-        onClose={() => setShowLinkWarning(false)}
+        onClose={handleCancel}
         onConfirm={handleConfirmLink}
       />
     </div>
   );
-}
-
-function getTimeAgo(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffHours < 1) return "just now";
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays === 1) return "yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  return `${Math.floor(diffDays / 30)}mo ago`;
 }

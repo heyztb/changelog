@@ -11,6 +11,7 @@ const Nav: React.FC<NavProps> = ({ fid }) => {
       <div className="flex items-stretch h-12">
         <Link
           to="/"
+          aria-label="Home"
           className="flex-1 flex items-center justify-center hover:bg-accent transition-colors"
           activeProps={{
             className: "text-primary bg-accent",
@@ -21,6 +22,7 @@ const Nav: React.FC<NavProps> = ({ fid }) => {
         </Link>
         <Link
           to={`/user/${fid}`}
+          aria-label="Profile"
           className="flex-1 flex items-center justify-center hover:bg-accent transition-colors"
           activeProps={{
             className: "text-primary bg-accent",

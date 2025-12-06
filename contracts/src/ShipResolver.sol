@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.30;
 
 import {SchemaResolver} from "@eas/resolver/SchemaResolver.sol";
 import {IEAS, Attestation} from "@eas/IEAS.sol";
 import {IStreakTracker} from "./interfaces/IStreakTracker.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@solady/auth/Ownable.sol";
 
 /// @title ShipResolver
 /// @notice Resolver contract for Ship attestations on EAS
@@ -23,8 +23,11 @@ contract ShipResolver is SchemaResolver, Ownable {
     /// @notice Minimum time between ships (24 hours)
     uint256 public constant MIN_SHIP_INTERVAL = 24 hours;
 
-    /// @notice Maximum text length for ships (prevents spam)
-    uint256 public constant MAX_TEXT_LENGTH = 5000;
+    /// @notice Minimum text length for ships (aimed at low effort posts)
+    uint256 public constant MIN_TEXT_LENGTH = 30;
+
+    /// @notice Maximum text length for ships (casts are better for longer posts -- share it all there!)
+    uint256 public constant MAX_TEXT_LENGTH = 240;
 
     /// @notice Maximum number of links per ship
     uint256 public constant MAX_LINKS = 10;
@@ -49,6 +52,9 @@ contract ShipResolver is SchemaResolver, Ownable {
 
     /// @notice Error thrown when the ship text is empty
     error EmptyShipText();
+
+    /// @notice Error thrown when the ship text does not meet minimum length
+    error ShipTextTooShort();
 
     /// @notice Error thrown when the ship text exceeds maximum length
     error ShipTextTooLong();
@@ -75,7 +81,8 @@ contract ShipResolver is SchemaResolver, Ownable {
         IStreakTracker _streakTracker,
         bytes32 _projectSchemaUID,
         address initialOwner
-    ) SchemaResolver(_eas) Ownable(initialOwner) {
+    ) SchemaResolver(_eas) {
+        _initializeOwner(initialOwner);
         streakTracker = _streakTracker;
         projectSchemaUID = _projectSchemaUID;
     }
@@ -110,6 +117,7 @@ contract ShipResolver is SchemaResolver, Ownable {
 
         // Validate text
         if (bytes(text).length == 0) revert EmptyShipText();
+        if (bytes(text).length < MIN_TEXT_LENGTH) revert ShipTextTooShort();
         if (bytes(text).length > MAX_TEXT_LENGTH) revert ShipTextTooLong();
 
         // Validate links array

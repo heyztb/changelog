@@ -1,6 +1,8 @@
 import { AlertTriangle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 interface LinkWarningModalProps {
   isOpen: boolean;
@@ -30,7 +32,11 @@ export function LinkWarningModal({
 
   const handleConfirm = () => {
     if (dontShowAgain) {
-      localStorage.setItem("skip-link-warning", "true");
+      try {
+        localStorage.setItem(STORAGE_KEYS.SKIP_LINK_WARNING, "true");
+      } catch {
+        /* ignore storage errors */
+      }
     }
     onConfirm();
   };
@@ -76,18 +82,19 @@ export function LinkWarningModal({
           </div>
 
           <div className="flex items-center gap-2 pt-2">
-            <input
-              type="checkbox"
-              id="dont-show"
-              checked={dontShowAgain}
-              onChange={(e) => setDontShowAgain(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 cursor-pointer"
-            />
             <label
               htmlFor="dont-show"
-              className="text-xs text-gray-500 cursor-pointer select-none"
+              className="flex items-center gap-2 cursor-pointer select-none"
             >
-              Don't show this warning again
+              <Checkbox
+                id="dont-show"
+                checked={dontShowAgain}
+                onCheckedChange={(val) => setDontShowAgain(Boolean(val))}
+                className="h-4 w-4"
+              />
+              <span className="text-xs text-gray-500">
+                Don't show this warning again
+              </span>
             </label>
           </div>
         </div>

@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-
-const PROJECTS_LOCAL_STORAGE_KEY = "changelog-user-projects";
+import { STORAGE_KEYS } from "@/lib/constants";
 
 export function useUserProjects() {
   const [projects, setProjects] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load projects from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(PROJECTS_LOCAL_STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEYS.USER_PROJECTS);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -22,12 +20,11 @@ export function useUserProjects() {
     setIsLoaded(true);
   }, []);
 
-  // Save projects to localStorage whenever they change
   useEffect(() => {
     if (isLoaded) {
       try {
         localStorage.setItem(
-          PROJECTS_LOCAL_STORAGE_KEY,
+          STORAGE_KEYS.USER_PROJECTS,
           JSON.stringify(projects),
         );
       } catch (e) {
@@ -41,7 +38,6 @@ export function useUserProjects() {
     if (!trimmed) return false;
 
     setProjects((prev) => {
-      // Check if project already exists (case-insensitive)
       const exists = prev.some(
         (p) => p.toLowerCase() === trimmed.toLowerCase(),
       );

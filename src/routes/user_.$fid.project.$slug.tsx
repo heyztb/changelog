@@ -4,6 +4,8 @@ import { getUserByFid, getShipsByProject } from "@/lib/mock-data";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
 import { useState } from "react";
+import { useLinkWarning } from "@/hooks/useLinkWarning";
+import { getTimeAgo } from "@/lib/utils";
 
 export const Route = createFileRoute("/user_/$fid/project/$slug")({
   component: ProjectChangelogComponent,
@@ -13,31 +15,9 @@ function ProjectChangelogComponent() {
   const { fid, slug } = Route.useParams();
   const user = getUserByFid(parseInt(fid, 10));
   const ships = getShipsByProject(parseInt(fid, 10), slug);
-  const [showLinkWarning, setShowLinkWarning] = useState(false);
-  const [pendingLink, setPendingLink] = useState<string | null>(null);
+  const { showLinkWarning, handleLinkClick, handleConfirmLink, handleCancel } =
+    useLinkWarning();
 
-  const handleLinkClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    url: string,
-  ) => {
-    e.preventDefault();
-    if (localStorage.getItem("skip-link-warning") === "true") {
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    setPendingLink(url);
-    setShowLinkWarning(true);
-  };
-
-  const handleConfirmLink = () => {
-    if (pendingLink) {
-      window.open(pendingLink, "_blank", "noopener,noreferrer");
-      setShowLinkWarning(false);
-      setPendingLink(null);
-    }
-  };
-
-  // Find the project from user's projects
   const project = user?.projects.find((p) => p.slug === slug);
 
   if (!user) {
@@ -76,7 +56,6 @@ function ProjectChangelogComponent() {
   return (
     <div className="flex flex-col items-center mt-8 min-h-[80vh]">
       <div className="w-full max-w-3xl px-4">
-        {/* Back button */}
         <Link
           to="/user/$fid"
           params={{ fid }}
@@ -86,7 +65,6 @@ function ProjectChangelogComponent() {
           Back to {user.displayName}'s profile
         </Link>
 
-        {/* Project header */}
         <div className="flex items-start gap-6 mb-10">
           <div className="w-16 h-16 rounded-xl bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-2xl font-bold shrink-0">
             {project.name.charAt(0).toUpperCase()}
@@ -124,7 +102,6 @@ function ProjectChangelogComponent() {
           </div>
         </div>
 
-        {/* Changelog header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Changelog
@@ -134,7 +111,6 @@ function ProjectChangelogComponent() {
           </span>
         </div>
 
-        {/* Ship timeline */}
         <ShipTimeline
           ships={ships}
           onLinkClick={handleLinkClick}
@@ -144,23 +120,9 @@ function ProjectChangelogComponent() {
 
       <LinkWarningModal
         isOpen={showLinkWarning}
-        onClose={() => setShowLinkWarning(false)}
+        onClose={handleCancel}
         onConfirm={handleConfirmLink}
       />
     </div>
   );
-}
-
-function getTimeAgo(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffHours < 1) return "just now";
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays === 1) return "yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  return `${Math.floor(diffDays / 30)}mo ago`;
 }
