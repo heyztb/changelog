@@ -8,7 +8,7 @@ type NavProps = {
 const Nav: React.FC<NavProps> = ({ fid }) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 border-t bg-background z-10">
-      <div className="flex items-stretch h-12">
+      <div className="flex items-stretch h-14">
         <Link
           to="/"
           aria-label="Home"
