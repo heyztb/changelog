@@ -237,7 +237,7 @@ export function Composer({
         onKeyDown={handleKeyDown}
         placeholder="What did you make progress on today?"
         className="w-full bg-transparent border-none text-black dark:text-white placeholder:text-gray-400 resize-none text-base focus-visible:ring-0 focus-visible:ring-offset-0 min-h-6 max-h-[200px]"
-        rows={1}
+        rows={2}
       />
 
       {attachments.length > 0 && (
