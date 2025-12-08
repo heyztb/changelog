@@ -45,7 +45,10 @@ export function LinkWarningModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
+        onClick={() => {
+          setDontShowAgain(false);
+          onClose();
+        }}
       />
       <div className="relative w-full max-w-sm bg-white dark:bg-neutral-800 rounded-3xl p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-neutral-700">
         <div className="flex flex-col items-center text-center space-y-4">
@@ -75,7 +78,10 @@ export function LinkWarningModal({
             <Button
               variant="ghost"
               className="w-full h-10 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700"
-              onClick={onClose}
+              onClick={() => {
+                setDontShowAgain(false);
+                onClose();
+              }}
             >
               Cancel
             </Button>
