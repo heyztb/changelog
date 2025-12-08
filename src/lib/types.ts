@@ -23,6 +23,15 @@ export type Project = {
   shipCount: number;
   lastShipAt: Date;
   ships: Ship[];
+  default: boolean;
+};
+
+export type EASProjectSchema = {
+  name: string;
+  description: string;
+  website: string;
+  creator: string;
+  createdAt: Date;
 };
 
 export type User = {
