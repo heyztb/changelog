@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Wallet, LogOut } from "lucide-react";
 import { useConnection, useConnect, useConnectors, useDisconnect } from "wagmi";
@@ -19,11 +19,11 @@ export default function ConnectWallet() {
 
   const primaryConnector = injectedConnector ?? connectors?.[0] ?? null;
 
-  const handleConnect = async () => {
+  const handleConnect = () => {
     if (!primaryConnector) return;
     try {
       // prefer the injected connector if available and connect to Base by default
-      await connect?.({ connector: primaryConnector as any, chainId: base.id });
+      connect?.({ connector: primaryConnector as any, chainId: base.id });
     } catch (err) {
       // keep UI resilient — log to console for debugging
       // eslint-disable-next-line no-console
@@ -31,9 +31,9 @@ export default function ConnectWallet() {
     }
   };
 
-  const handleDisconnect = async () => {
+  const handleDisconnect = () => {
     try {
-      await disconnect?.();
+      disconnect?.();
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("ConnectWallet: failed to disconnect", err);
