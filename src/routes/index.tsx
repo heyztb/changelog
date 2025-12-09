@@ -7,6 +7,7 @@ import { useLinkWarning } from "@/hooks/useLinkWarning";
 import { LinkWarningModal } from "@/components/LinkWarningModal";
 import { ShipTimeline } from "@/components/ShipTimeline";
 import { Composer } from "@/components/Composer";
+import { EmptyProjects } from "@/components/EmptyProjects";
 import { useOnboarding } from "@/hooks/useOnboarding";
 
 export const Route = createFileRoute("/")({
@@ -29,12 +30,15 @@ function IndexComponent() {
           {tagline}
         </h1>
 
-        <Composer
-          projects={projects}
-          addProject={addProject}
-          isLoaded={isLoaded}
-          onLinkClick={handleLinkClick}
-        />
+        {projects.length === 0 && <EmptyProjects />}
+        {projects.length > 0 && (
+          <Composer
+            projects={projects}
+            addProject={addProject}
+            isLoaded={isLoaded}
+            onLinkClick={handleLinkClick}
+          />
+        )}
 
         <div className="mt-12">
           <ShipTimeline
