@@ -39,7 +39,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@tanstack/react-router-devtools": "^1.139.15",
+    "@tanstack/react-router-devtools": "^1.140.0",
     "@tanstack/router-cli": "^1.139.14",
     "@types/bun": "latest",
     "@types/react": "^19.2.7",
