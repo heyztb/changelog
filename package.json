@@ -36,7 +36,7 @@
     "tslog": "^4.10.2",
     "viem": "^2.41.2",
     "wagmi": "^3.1.0",
-    "zod": "^4.1.13"
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@tanstack/react-router-devtools": "^1.140.0",
